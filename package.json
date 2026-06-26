@@ -1,0 +1,21 @@
+{
+  "name": "travel-planner",
+  "version": "1.0.0",
+  "description": "A simple Travel Planner web application using HTML, CSS, JavaScript and Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "travel",
+    "planner",
+    "nodejs",
+    "express"
+  ],
+  "author": "Eswar",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}
