@@ -1,35 +1,226 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Travel Planner</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travel Planner</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    padding:20px;
+}
+
+.container{
+    width:100%;
+    max-width:450px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.2);
+    animation:fadeIn 0.8s ease;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:25px;
+    color:#333;
+}
+
+.input-group{
+    margin-bottom:18px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-weight:600;
+    color:#444;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    border:2px solid #e2e2e2;
+    border-radius:12px;
+    outline:none;
+    font-size:15px;
+    transition:0.3s;
+}
+
+input:focus{
+    border-color:#667eea;
+    box-shadow:0 0 10px rgba(102,126,234,0.3);
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    color:white;
+    font-size:16px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 20px rgba(102,126,234,0.4);
+}
+
+button:disabled{
+    opacity:0.7;
+    cursor:not-allowed;
+}
+
+.result{
+    margin-top:20px;
+    padding:15px;
+    border-radius:12px;
+    display:none;
+    animation:fadeIn 0.5s ease;
+}
+
+.success{
+    background:#e8f7ec;
+    color:#1f7a38;
+}
+
+.error{
+    background:#fdeaea;
+    color:#b42318;
+}
+
+.loader{
+    display:inline-block;
+    width:18px;
+    height:18px;
+    border:3px solid rgba(255,255,255,0.3);
+    border-top:3px solid white;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    to{transform:rotate(360deg);}
+}
+
+@keyframes fadeIn{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+</style>
 </head>
 <body>
 
-<h2>Travel Planner</h2>
+<div class="container">
+    <h2>✈️ Travel Planner</h2>
 
-<input id="from" placeholder="From">
-<input id="to" placeholder="To">
-<input id="date" type="date">
+    <div class="input-group">
+        <label>📍 From</label>
+        <input id="from" type="text" placeholder="Enter departure city">
+    </div>
 
-<button onclick="planTrip()">Plan My Trip</button>
+    <div class="input-group">
+        <label>🏁 To</label>
+        <input id="to" type="text" placeholder="Enter destination">
+    </div>
 
-<p id="result"></p>
+    <div class="input-group">
+        <label>📅 Travel Date</label>
+        <input id="date" type="date">
+    </div>
+
+    <button id="planBtn" onclick="planTrip()">
+        Plan My Trip
+    </button>
+
+    <div id="result" class="result"></div>
+</div>
 
 <script>
-function planTrip() {
-    let from = document.getElementById("from").value;
-    let to = document.getElementById("to").value;
-    let date = document.getElementById("date").value;
+async function planTrip() {
+    const from = document.getElementById("from").value.trim();
+    const to = document.getElementById("to").value.trim();
+    const date = document.getElementById("date").value;
+    const result = document.getElementById("result");
+    const btn = document.getElementById("planBtn");
 
-    fetch("http://localhost:3000/plan-trip", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ from, to, date })
-    })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("result").innerText = data.message;
-    });
+    if (!from || !to || !date) {
+        showMessage("Please fill all fields.", false);
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loader"></span> Planning...';
+
+    try {
+        const response = await fetch(
+            "http://localhost:3000/plan-trip",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    from,
+                    to,
+                    date
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        showMessage(
+            data.message ||
+            `Trip planned from ${from} to ${to} on ${date}`,
+            true
+        );
+
+    } catch (error) {
+        showMessage(
+            "Unable to connect to server.",
+            false
+        );
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = "Plan My Trip";
+}
+
+function showMessage(message, success) {
+    const result = document.getElementById("result");
+
+    result.style.display = "block";
+    result.className = success
+        ? "result success"
+        : "result error";
+
+    result.innerHTML = message;
 }
 </script>
 
